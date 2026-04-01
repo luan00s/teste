@@ -1,106 +1,95 @@
+const db = require("../database/connection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const db = require("../database/connection");
 
+exports.register = (req, res) => {
+  const { nome, email, senha } = req.body || {};
 
-// =========================
-// REGISTER
-// =========================
-exports.register = async (req, res) => {
+  if (!nome || !email || !senha) {
+    return res.status(400).json({ erro: "Dados incompletos" });
+  }
 
- try {
+  db.query(
+    "SELECT * FROM usuarios WHERE email = ?",
+    [email],
+    async (err, result) => {
+      if (err) {
+        return res.status(500).json({ erro: "Erro no servidor" });
+      }
 
-  const { nome, email, senha } = req.body;
+      if (result.length > 0) {
+        return res.status(400).json({ erro: "Email já cadastrado" });
+      }
 
-  const senhaHash = await bcrypt.hash(senha, 10);
+      try {
+        const senhaHash = await bcrypt.hash(senha, 10);
 
-  const sql = `
-   INSERT INTO usuarios (nome, email, senha)
-   VALUES (?, ?, ?)
-  `;
+        db.query(
+          "INSERT INTO usuarios (nome, email, senha, saldo) VALUES (?, ?, ?, ?)",
+          [nome, email, senhaHash, 1000],
+          (errInsert) => {
+            if (errInsert) {
+              return res.status(500).json({ erro: "Erro ao cadastrar usuário" });
+            }
 
-  db.query(sql, [nome, email, senhaHash], (err, result) => {
-
-   if (err) {
-
-    if (err.code === "ER_DUP_ENTRY") {
-     return res.status(400).json({
-      erro: "Email já cadastrado"
-     });
+            return res.status(201).json({
+              mensagem: "Usuário cadastrado com sucesso",
+            });
+          }
+        );
+      } catch (error) {
+        return res.status(500).json({ erro: "Erro ao processar cadastro" });
+      }
     }
-
-    console.error(err);
-
-    return res.status(500).json({
-     erro: "Erro ao criar usuário"
-    });
-
-   }
-
-   res.json({
-    mensagem: "Usuário criado com sucesso"
-   });
-
-  });
-
- } catch (error) {
-
-  console.error(error);
-
-  res.status(500).json({
-   erro: "Erro no servidor"
-  });
-
- }
-
+  );
 };
 
-
-
-// =========================
-// LOGIN
-// =========================
 exports.login = (req, res) => {
+  const { email, senha } = req.body || {};
 
- const { email, senha } = req.body;
-
- const sql = "SELECT * FROM usuarios WHERE email = ?";
-
- db.query(sql, [email], async (err, results) => {
-
-  if (err) {
-   return res.status(500).json({
-    erro: "Erro no servidor"
-   });
+  if (!email || !senha) {
+    return res.status(400).json({ erro: "Dados incompletos" });
   }
 
-  if (results.length === 0) {
-   return res.status(400).json({
-    erro: "Usuário não encontrado"
-   });
-  }
+  db.query(
+    "SELECT * FROM usuarios WHERE email = ?",
+    [email],
+    async (err, result) => {
+      if (err) {
+        return res.status(500).json({ erro: "Erro no servidor" });
+      }
 
-  const usuario = results[0];
+      if (result.length === 0) {
+        return res.status(404).json({ erro: "Usuário não encontrado" });
+      }
 
-  const senhaValida = await bcrypt.compare(senha, usuario.senha);
+      try {
+        const usuario = result[0];
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
-  if (!senhaValida) {
-   return res.status(401).json({
-    erro: "Senha incorreta"
-   });
-  }
+        if (!senhaValida) {
+          return res.status(401).json({ erro: "Senha incorreta" });
+        }
 
-  const token = jwt.sign(
-   { id: usuario.id },
-   "segredo",
-   { expiresIn: "1h" }
+        const token = jwt.sign(
+          { id: usuario.id, email: usuario.email },
+          process.env.JWT_SECRET || "segredo",
+          { expiresIn: "1d" }
+        );
+
+        return res.json({
+          mensagem: "Login realizado com sucesso",
+          token,
+          usuario: {
+            id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            saldo: Number(usuario.saldo),
+          },
+        });
+      } catch (error) {
+        return res.status(500).json({ erro: "Erro ao fazer login" });
+      }
+    }
   );
-
-  res.json({
-   mensagem: "Login realizado com sucesso",
-   token: token
-  });
-
- });
-
 };

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<title>Fazer Aposta</title>
+</head>
+
+<body>
+
+<h1>Fazer Aposta</h1>
+
+<label>Grupo do Bicho</label><br>
+<input id="grupo" placeholder="Ex: 10"><br><br>
+
+<label>Número</label><br>
+<input id="numero" placeholder="Ex: 1234"><br><br>
+
+<label>Valor da aposta</label><br>
+<input id="valor" placeholder="Ex: 5"><br><br>
+
+<button onclick="apostar()">Apostar</button>
+
+<br><br>
+
+<button onclick="voltar()">Voltar ao painel</button>
+
+<script>
+
+const API = "http://localhost:3000";
+
+async function apostar(){
+
+ const grupo = document.getElementById("grupo").value;
+ const numero = document.getElementById("numero").value;
+ const valor = document.getElementById("valor").value;
+
+ const token = localStorage.getItem("token");
+
+ try{
+
+  const res = await fetch(API + "/aposta",{
+
+   method:"POST",
+
+   headers:{
+    "Content-Type":"application/json",
+    "Authorization":"Bearer " + token
+   },
+
+   body:JSON.stringify({
+    grupo,
+    numero,
+    valor
+   })
+
+  });
+
+  const data = await res.json();
+
+  alert("Aposta registrada!");
+
+ }catch(err){
+
+  alert("Erro ao apostar");
+
+ }
+
+}
+
+function voltar(){
+
+ window.location.href = "dashboard.html";
+
+}
+
+</script>
+
+</body>
+</html>

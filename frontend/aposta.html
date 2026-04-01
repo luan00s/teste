@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<title>Minhas Apostas</title>
+</head>
+
+<body>
+
+<h1>Minhas Apostas</h1>
+
+<button onclick="carregarApostas()">Ver apostas</button>
+<button onclick="verApostas()">Carregar apostas</button>
+
+
+<br><br>
+
+<table border="1">
+
+<thead>
+<tr>
+<th>Animal</th>
+<th>Valor</th>
+<th>Data</th>
+<th>REsultado</th>
+
+</tr>
+</thead>
+
+<tbody id="tabelaApostas"></tbody>
+
+<tbody id="tabelaApostas"></tbody>
+
+</table>
+
+<br>
+
+<button onclick="voltar()">Voltar</button>
+
+<script>
+
+const API = "http://localhost:3000";
+
+async function carregarApostas(){
+
+ const token = localStorage.getItem("token");
+
+ const res = await fetch(API + "/apostas",{
+  headers:{
+   "Authorization":"Bearer " + token
+  }
+ });
+
+ const data = await res.json();
+
+ const tabela = document.getElementById("tabelaApostas");
+
+ tabela.innerHTML="";
+
+ data.forEach(aposta => {
+
+  tabela.innerHTML += `
+   <tr>
+    <td>${aposta.animal}</td>
+    <td>${aposta.valor}</td>
+   </tr>
+  `;
+
+ });
+
+}
+
+function voltar(){
+
+ window.location.href = "dashboard.html";
+
+}
+
+</script>
+
+</body>
+</html>

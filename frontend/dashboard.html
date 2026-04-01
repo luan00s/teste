@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<title>Dashboard</title>
+
+<style>
+
+body{
+ font-family: Arial;
+ text-align: center;
+ background:#f4f4f4;
+}
+
+.container{
+ margin-top:60px;
+}
+
+button{
+
+ padding:12px;
+ margin:10px;
+ width:200px;
+ font-size:16px;
+ cursor:pointer;
+ border:none;
+ background:#2c7be5;
+ color:white;
+ border-radius:5px;
+
+}
+
+button:hover{
+ background:#1a5dc9;
+}
+
+.resultado{
+
+ margin-top:30px;
+ font-size:22px;
+ font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body onload="mostrarResultado()">
+
+<div class="container">
+
+<h1>Painel do Sistema</h1>
+
+<button onclick="window.location.href='aposta.html'">
+Fazer aposta
+</button>
+
+<br>
+
+<button onclick="window.location.href='apostas.html'">
+Minhas apostas
+</button>
+
+<br>
+
+<button onclick="gerarSorteio()">
+Gerar sorteio
+</button>
+
+<br>
+
+<button onclick="logout()">
+Sair
+</button>
+
+<div class="resultado" id="resultado"></div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+
+function mostrarResultado(){
+
+ const resultado = localStorage.getItem("resultado");
+
+ if(resultado){
+
+  document.getElementById("resultado").innerText =
+  "Animal sorteado: " + resultado;
+
+ }
+
+}
+
+</script>
+
+</body>
+
+</html>
