@@ -11,10 +11,6 @@ jobs:
     name: Backend Check
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: jogo-api
-
     steps:
       - name: Clonar repositório
         uses: actions/checkout@v4
@@ -31,12 +27,8 @@ jobs:
         run: node --check server.js
 
   frontend:
-    name: Frontend Build
+    name: Frontend Check
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Clonar repositório
@@ -50,5 +42,5 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Build do frontend
+      - name: Verificar frontend
         run: echo "Frontend OK"
